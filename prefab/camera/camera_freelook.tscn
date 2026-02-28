@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://io04eppr6uma"]
+
+[ext_resource type="Script" uid="uid://bky06kthopp56" path="res://prefab/camera/camera_freelook.gd" id="1_fegkr"]
+
+[node name="Freelook Camera" type="Camera2D" unique_id=1880484832]
+script = ExtResource("1_fegkr")

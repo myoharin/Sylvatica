@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://dynu3anjasu7h"]
+
+[ext_resource type="PackedScene" uid="uid://io04eppr6uma" path="res://prefab/camera/camera_freelook.tscn" id="3_b8pkg"]
+[ext_resource type="Script" uid="uid://bre8pwqeuyc57" path="res://prefab/mouse_actions/mouse_grabber.gd" id="3_iefuh"]
+[ext_resource type="PackedScene" uid="uid://b5joaljbdvv7i" path="res://prefab/doll/doll.tscn" id="3_osfxk"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_soann"]
+size = Vector2(300, 20.65)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_iefuh"]
+size = Vector2(20, 4.565)
+
+[node name="Root" type="Node2D" unique_id=576160865]
+
+[node name="Floor" type="StaticBody2D" parent="." unique_id=684902715]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor" unique_id=1886453337]
+position = Vector2(0, 10)
+shape = SubResource("RectangleShape2D_soann")
+
+[node name="Freelook Camera" parent="." unique_id=1880484832 instance=ExtResource("3_b8pkg")]
+position = Vector2(-2, -48)
+ignore_rotation = false
+zoom = Vector2(5, 5)
+limit_enabled = false
+limit_left = 0
+limit_top = 0
+limit_right = 1152
+limit_bottom = 648
+
+[node name="MouseGrabber" type="RayCast2D" parent="." unique_id=1531920011]
+position = Vector2(-66, -69)
+target_position = Vector2(0, -10)
+hit_from_inside = true
+script = ExtResource("3_iefuh")
+tenacity = 67.86999999999999
+
+[node name="Toy" type="StaticBody2D" parent="." unique_id=1908350350]
+position = Vector2(63, -19)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Toy" unique_id=282893224]
+shape = SubResource("RectangleShape2D_iefuh")
+
+[node name="Doll" parent="." unique_id=1524327385 instance=ExtResource("3_osfxk")]

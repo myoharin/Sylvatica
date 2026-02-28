@@ -1,0 +1,111 @@
+[gd_scene format=3 uid="uid://b5joaljbdvv7i"]
+
+[ext_resource type="Script" uid="uid://cl5pg4g8pn4kx" path="res://prefab/doll/doll.gd" id="1_76dj2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_m41lp"]
+size = Vector2(13, 17)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_m41lp"]
+radius = 8.0
+
+[sub_resource type="Gradient" id="Gradient_m41lp"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_6wnk1"]
+gradient = SubResource("Gradient_m41lp")
+width = 10
+height = 10
+fill_from = Vector2(0.23090278, 0.5954861)
+fill_to = Vector2(0.5902778, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6wnk1"]
+size = Vector2(12, 6)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_m41lp"]
+b = Vector2(0, -10)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_6wnk1"]
+b = Vector2(0, 30)
+
+[node name="Doll" type="Node2D" unique_id=1212199156 node_paths=PackedStringArray("head", "torso", "feet", "joint_neck_head", "joint_neck_torso", "joint_leg_torso", "joint_leg_feet")]
+physics_interpolation_mode = 2
+script = ExtResource("1_76dj2")
+head = NodePath("Head")
+torso = NodePath("Torso")
+feet = NodePath("Feet")
+joint_neck_head = NodePath("Neck Head Joint")
+joint_neck_torso = NodePath("Neck Torso Joint")
+joint_leg_torso = NodePath("Leg Torso Joint")
+joint_leg_feet = NodePath("Leg Feet Joint")
+
+[node name="Torso" type="CharacterBody2D" parent="." unique_id=590964596]
+position = Vector2(0, -39)
+platform_floor_layers = 4294967167
+
+[node name="Rectangle" type="CollisionShape2D" parent="Torso" unique_id=1728090952]
+shape = SubResource("RectangleShape2D_m41lp")
+
+[node name="Head" type="CharacterBody2D" parent="." unique_id=506462072]
+position = Vector2(0, -60)
+platform_floor_layers = 4294967167
+
+[node name="Circle" type="CollisionShape2D" parent="Head" unique_id=719094577]
+shape = SubResource("CircleShape2D_m41lp")
+
+[node name="Sprite2D" type="Sprite2D" parent="Head" unique_id=1008995283]
+texture = SubResource("GradientTexture2D_6wnk1")
+
+[node name="Feet" type="CharacterBody2D" parent="." unique_id=1059183111]
+position = Vector2(0, -3)
+platform_floor_layers = 4294967167
+
+[node name="Rectangle" type="CollisionShape2D" parent="Feet" unique_id=1280765639]
+shape = SubResource("RectangleShape2D_6wnk1")
+
+[node name="Neck" type="CharacterBody2D" parent="." unique_id=24812059]
+position = Vector2(0, -45)
+platform_floor_layers = 4294967167
+
+[node name="Line" type="CollisionShape2D" parent="Neck" unique_id=1519535988]
+shape = SubResource("SegmentShape2D_m41lp")
+disabled = true
+
+[node name="Leg" type="CharacterBody2D" parent="." unique_id=231259912]
+position = Vector2(0, -2)
+platform_floor_layers = 4294967167
+
+[node name="Rectangle" type="CollisionShape2D" parent="Leg" unique_id=2076986827]
+position = Vector2(0, -31)
+shape = SubResource("SegmentShape2D_6wnk1")
+disabled = true
+
+[node name="Neck Head Joint" type="PinJoint2D" parent="." unique_id=2087407505]
+visible = false
+position = Vector2(0, -15)
+node_a = NodePath("../Head")
+node_b = NodePath("../Neck")
+disable_collision = false
+angular_limit_enabled = true
+
+[node name="Neck Torso Joint" type="PinJoint2D" parent="." unique_id=1843328320]
+visible = false
+position = Vector2(0, -7)
+node_a = NodePath("../Torso")
+node_b = NodePath("../Neck")
+disable_collision = false
+angular_limit_enabled = true
+
+[node name="Leg Torso Joint" type="PinJoint2D" parent="." unique_id=87892846]
+visible = false
+position = Vector2(0, 7)
+node_a = NodePath("../Torso")
+node_b = NodePath("../Leg")
+disable_collision = false
+angular_limit_enabled = true
+
+[node name="Leg Feet Joint" type="PinJoint2D" parent="." unique_id=1433498782]
+visible = false
+position = Vector2(0, 35)
+node_a = NodePath("../Feet")
+node_b = NodePath("../Leg")
+disable_collision = false
+angular_limit_enabled = true
