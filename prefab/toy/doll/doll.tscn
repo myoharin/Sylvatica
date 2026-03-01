@@ -1,0 +1,149 @@
+[gd_scene format=3 uid="uid://b5joaljbdvv7i"]
+
+[ext_resource type="Script" uid="uid://cl5pg4g8pn4kx" path="res://prefab/toy/doll/doll.gd" id="1_76dj2"]
+[ext_resource type="Script" uid="uid://3unie6etg65u" path="res://prefab/toy/doll/doll_procedural_render.gd" id="2_3ncgx"]
+[ext_resource type="Script" uid="uid://dlrs5nhfjtotk" path="res://prefab/toy/doll/doll_movement_controller.gd" id="2_f0113"]
+[ext_resource type="Script" uid="uid://8m61rd66cy3" path="res://prefab/toy/doll/doll_input_handler.gd" id="3_1tm35"]
+[ext_resource type="Script" uid="uid://dt5tecinu27x6" path="res://prefab/toy/doll/doll_active_ragdoll_animator.gd" id="5_jd47f"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_m41lp"]
+radius = 40.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_m41lp"]
+size = Vector2(65, 85)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6wnk1"]
+size = Vector2(50, 30)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5t14u"]
+radius = 15.0
+
+[node name="Doll" type="Node2D" unique_id=1212199156 node_paths=PackedStringArray("input_handler")]
+physics_interpolation_mode = 2
+script = ExtResource("1_76dj2")
+input_handler = NodePath("Input Handler")
+
+[node name="Procedural Renderer" type="Node" parent="." unique_id=1969546211 node_paths=PackedStringArray("doll")]
+script = ExtResource("2_3ncgx")
+doll = NodePath("..")
+
+[node name="Input Handler" type="Node" parent="." unique_id=452066496 node_paths=PackedStringArray("doll")]
+script = ExtResource("3_1tm35")
+doll = NodePath("..")
+
+[node name="Movement Controller" type="Node" parent="." unique_id=1390720337 node_paths=PackedStringArray("doll", "head", "torso", "feet")]
+script = ExtResource("2_f0113")
+doll = NodePath("..")
+head = NodePath("../Physics Body/Head")
+torso = NodePath("../Physics Body/Torso")
+feet = NodePath("../Physics Body/Feet")
+
+[node name="Ragdoll Animator" type="Node" parent="." unique_id=1861148538 node_paths=PackedStringArray("doll", "head", "torso", "hip", "ankle", "feet", "ankle_joint", "hip_joint", "leg", "animated_head", "animated_torso", "animated_feet")]
+script = ExtResource("5_jd47f")
+doll = NodePath("..")
+head = NodePath("../Physics Body/Head")
+torso = NodePath("../Physics Body/Torso")
+hip = NodePath("../Physics Body/Hip")
+ankle = NodePath("../Physics Body/Ankle")
+feet = NodePath("../Physics Body/Feet")
+ankle_joint = NodePath("../Physics Body/Ankle Joint")
+hip_joint = NodePath("../Physics Body/Hip Joint")
+leg = NodePath("../Physics Body/Leg")
+animated_head = NodePath("../Animation Body/Head")
+animated_torso = NodePath("../Animation Body/Torso")
+animated_feet = NodePath("../Animation Body/Feet")
+stablize_toque_strength = 500000.0
+
+[node name="Physics Body" type="Node2D" parent="." unique_id=1094900884]
+
+[node name="Head" type="RigidBody2D" parent="Physics Body" unique_id=2059747671]
+position = Vector2(1, -375)
+
+[node name="Circle" type="CollisionShape2D" parent="Physics Body/Head" unique_id=719094577]
+shape = SubResource("CircleShape2D_m41lp")
+
+[node name="Torso" type="RigidBody2D" parent="Physics Body" unique_id=1426645178]
+position = Vector2(1, -280)
+
+[node name="Rectangle" type="CollisionShape2D" parent="Physics Body/Torso" unique_id=1728090952]
+shape = SubResource("RectangleShape2D_m41lp")
+
+[node name="Feet" type="RigidBody2D" parent="Physics Body" unique_id=308875820]
+position = Vector2(0, -17)
+can_sleep = false
+constant_force = Vector2(0, 10000)
+
+[node name="Rectangle" type="CollisionShape2D" parent="Physics Body/Feet" unique_id=1280765639]
+shape = SubResource("RectangleShape2D_6wnk1")
+
+[node name="Neck Joint" type="PinJoint2D" parent="Physics Body" unique_id=2087407505]
+position = Vector2(0, -323)
+node_a = NodePath("../Head")
+node_b = NodePath("../Torso")
+disable_collision = false
+
+[node name="Hip Joint" type="PinJoint2D" parent="Physics Body" unique_id=2140572891]
+position = Vector2(0, -210)
+node_a = NodePath("../Hip")
+node_b = NodePath("../Torso")
+disable_collision = false
+angular_limit_enabled = true
+angular_limit_lower = -0.34906584
+angular_limit_upper = 0.34906584
+
+[node name="Hip" type="RigidBody2D" parent="Physics Body" unique_id=1268924032]
+position = Vector2(0, -210)
+
+[node name="Circle" type="CollisionShape2D" parent="Physics Body/Hip" unique_id=1064624796]
+shape = SubResource("CircleShape2D_5t14u")
+disabled = true
+
+[node name="Ankle" type="RigidBody2D" parent="Physics Body" unique_id=806834438]
+position = Vector2(0, -59)
+
+[node name="Circle" type="CollisionShape2D" parent="Physics Body/Ankle" unique_id=145307688]
+shape = SubResource("CircleShape2D_5t14u")
+disabled = true
+
+[node name="Leg" type="GrooveJoint2D" parent="Physics Body" unique_id=931205586]
+position = Vector2(0, -210)
+node_a = NodePath("../Hip")
+node_b = NodePath("../Ankle")
+disable_collision = false
+length = 150.0
+initial_offset = 150.0
+
+[node name="Ankle Joint" type="PinJoint2D" parent="Physics Body" unique_id=399740015]
+position = Vector2(0, -59)
+node_a = NodePath("../Ankle")
+node_b = NodePath("../Feet")
+disable_collision = false
+angular_limit_enabled = true
+angular_limit_lower = -0.34906584
+angular_limit_upper = 0.34906584
+
+[node name="Animation Body" type="Node2D" parent="." unique_id=2076938369]
+
+[node name="Head" type="AnimatableBody2D" parent="Animation Body" unique_id=513057343]
+position = Vector2(1, -375)
+
+[node name="Circle" type="CollisionShape2D" parent="Animation Body/Head" unique_id=1137566728]
+shape = SubResource("CircleShape2D_m41lp")
+disabled = true
+debug_color = Color(0.4862745, 0.5764706, 0.2784314, 0.41960785)
+
+[node name="Torso" type="AnimatableBody2D" parent="Animation Body" unique_id=737589749]
+position = Vector2(1, -280)
+
+[node name="Rectangle" type="CollisionShape2D" parent="Animation Body/Torso" unique_id=1482522887]
+shape = SubResource("RectangleShape2D_m41lp")
+disabled = true
+debug_color = Color(0.4858191, 0.5781694, 0.27887836, 0.41960785)
+
+[node name="Feet" type="AnimatableBody2D" parent="Animation Body" unique_id=1411680475]
+position = Vector2(0, -17)
+
+[node name="Rectangle" type="CollisionShape2D" parent="Animation Body/Feet" unique_id=592561631]
+shape = SubResource("RectangleShape2D_6wnk1")
+disabled = true
+debug_color = Color(0.4862745, 0.5764706, 0.2784314, 0.41960785)

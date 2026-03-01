@@ -8,5 +8,5 @@ func get_distance_from_target() -> Vector2:
 
 func _process(delta: float) -> void:
 	if target != null:
-		position = position.lerp(get_distance_from_target(), intensity / log(delta))
+		position = position.lerp(get_distance_from_target(), intensity * delta)
 

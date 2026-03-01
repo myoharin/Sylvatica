@@ -5,7 +5,8 @@ var grabbed: CollisionObject2D = null
 var previous_tick_try_select = false
 # clipping is guanteed because teleportation is used.
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+    position = get_global_mouse_position()
     if Input.is_action_just_pressed("mouse_grabber_select"):
         previous_tick_try_select = true
         position = get_global_mouse_position()
@@ -29,8 +30,8 @@ func _process(_delta: float) -> void:
             grabbed = null
 
     if grabbed != null:
+        var direction = (get_global_mouse_position() - grabbed.position - position)
         if grabbed is StaticBody2D:
-            grabbed.position = get_global_mouse_position()
+            grabbed.constant_linear_velocity = direction
         if grabbed is RigidBody2D:
-            var direction = (get_global_mouse_position() - grabbed.position - position)
             grabbed.apply_central_force(direction * tenacity * grabbed.mass)
