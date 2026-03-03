@@ -8,7 +8,7 @@
 size = Vector2(1000, 50)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iefuh"]
-size = Vector2(20, 4.565)
+size = Vector2(100, 30)
 
 [node name="Root" type="Node2D" unique_id=576160865]
 

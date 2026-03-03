@@ -4,9 +4,12 @@ class_name DollMovementController extends Node
 
 @export_group("Reference Nodes")
 @export var doll: Doll
-@export var head: RigidBody2D
+# - Detecting Collision
+@export var head: RigidBody2D 
 @export var torso: RigidBody2D
 @export var feet: RigidBody2D
+# - Dominating Character
+@export var character: CharacterBody2D
 
 @export_category("Movement Parameters")
 @export_group("Movent State Parameters")

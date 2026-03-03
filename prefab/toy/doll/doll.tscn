@@ -12,11 +12,19 @@ radius = 40.0
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_m41lp"]
 size = Vector2(65, 85)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_6wnk1"]
-size = Vector2(50, 30)
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_3ncgx"]
+radius = 15.0
+height = 70.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_5t14u"]
 radius = 15.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_jd47f"]
+radius = 15.0
+height = 70.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3ncgx"]
+size = Vector2(63, 409.5)
 
 [node name="Doll" type="Node2D" unique_id=1212199156 node_paths=PackedStringArray("input_handler")]
 physics_interpolation_mode = 2
@@ -52,29 +60,33 @@ leg = NodePath("../Physics Body/Leg")
 animated_head = NodePath("../Animation Body/Head")
 animated_torso = NodePath("../Animation Body/Torso")
 animated_feet = NodePath("../Animation Body/Feet")
-stablize_toque_strength = 500000.0
+animated_body_force_stablization_threshold = 100.0
 
 [node name="Physics Body" type="Node2D" parent="." unique_id=1094900884]
 
 [node name="Head" type="RigidBody2D" parent="Physics Body" unique_id=2059747671]
 position = Vector2(1, -375)
+gravity_scale = 0.0
 
 [node name="Circle" type="CollisionShape2D" parent="Physics Body/Head" unique_id=719094577]
 shape = SubResource("CircleShape2D_m41lp")
 
 [node name="Torso" type="RigidBody2D" parent="Physics Body" unique_id=1426645178]
 position = Vector2(1, -280)
+gravity_scale = 0.0
 
 [node name="Rectangle" type="CollisionShape2D" parent="Physics Body/Torso" unique_id=1728090952]
 shape = SubResource("RectangleShape2D_m41lp")
 
 [node name="Feet" type="RigidBody2D" parent="Physics Body" unique_id=308875820]
 position = Vector2(0, -17)
-can_sleep = false
-constant_force = Vector2(0, 10000)
+gravity_scale = 0.0
+constant_force = Vector2(0, 100000)
 
-[node name="Rectangle" type="CollisionShape2D" parent="Physics Body/Feet" unique_id=1280765639]
-shape = SubResource("RectangleShape2D_6wnk1")
+[node name="Capsule" type="CollisionShape2D" parent="Physics Body/Feet" unique_id=2137399945]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_3ncgx")
+debug_color = Color(0, 0.6, 0.7019608, 0.41960785)
 
 [node name="Neck Joint" type="PinJoint2D" parent="Physics Body" unique_id=2087407505]
 position = Vector2(0, -323)
@@ -87,7 +99,6 @@ position = Vector2(0, -210)
 node_a = NodePath("../Hip")
 node_b = NodePath("../Torso")
 disable_collision = false
-angular_limit_enabled = true
 angular_limit_lower = -0.34906584
 angular_limit_upper = 0.34906584
 
@@ -118,7 +129,6 @@ position = Vector2(0, -59)
 node_a = NodePath("../Ankle")
 node_b = NodePath("../Feet")
 disable_collision = false
-angular_limit_enabled = true
 angular_limit_lower = -0.34906584
 angular_limit_upper = 0.34906584
 
@@ -143,7 +153,35 @@ debug_color = Color(0.4858191, 0.5781694, 0.27887836, 0.41960785)
 [node name="Feet" type="AnimatableBody2D" parent="Animation Body" unique_id=1411680475]
 position = Vector2(0, -17)
 
-[node name="Rectangle" type="CollisionShape2D" parent="Animation Body/Feet" unique_id=592561631]
-shape = SubResource("RectangleShape2D_6wnk1")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Animation Body/Feet" unique_id=345733260]
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_jd47f")
 disabled = true
-debug_color = Color(0.4862745, 0.5764706, 0.2784314, 0.41960785)
+
+[node name="HeadDragJoint" type="PinJoint2D" parent="Animation Body" unique_id=599567187]
+position = Vector2(1, -375)
+node_a = NodePath("../Head")
+node_b = NodePath("../../Physics Body/Head")
+softness = 1.0
+
+[node name="TorsoDragJoint" type="PinJoint2D" parent="Animation Body" unique_id=403238918]
+position = Vector2(1, -280)
+node_a = NodePath("../Torso")
+node_b = NodePath("../../Physics Body/Torso")
+softness = 1.0
+
+[node name="FeetDragJoint" type="PinJoint2D" parent="Animation Body" unique_id=1024208130]
+position = Vector2(0, -17)
+node_a = NodePath("../Feet")
+node_b = NodePath("../../Physics Body/Feet")
+softness = 1.0
+angular_limit_lower = -0.2617994
+angular_limit_upper = 0.2617994
+
+[node name="Character Body" type="CharacterBody2D" parent="." unique_id=2085410516]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Character Body" unique_id=524273107]
+position = Vector2(0, -206.75)
+shape = SubResource("RectangleShape2D_3ncgx")
+disabled = true
+debug_color = Color(0.9662761, 0, 0.48450154, 0.41960785)
