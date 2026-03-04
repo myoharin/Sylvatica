@@ -12,6 +12,7 @@
 [ext_resource type="Resource" uid="uid://csc1al2t8wr2e" path="res://asset/toy/doll/default_animation_state_frame/crawl.tres" id="10_kv2t5"]
 [ext_resource type="Resource" uid="uid://8vrkqeirx3ux" path="res://asset/toy/doll/default_animation_state_frame/flip.tres" id="11_1rl44"]
 [ext_resource type="Resource" uid="uid://cv8kb20koc6vv" path="res://asset/toy/doll/default_animation_state_frame/roll.tres" id="12_6fnwk"]
+[ext_resource type="Script" uid="uid://d05jbuyu0ye83" path="res://prefab/toy/doll/doll_ragdoll_component.gd" id="13_502nl"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_m41lp"]
 radius = 40.0
@@ -45,18 +46,21 @@ procedural_renderer = NodePath("Procedural Renderer")
 script = ExtResource("2_3ncgx")
 doll = NodePath("..")
 
-[node name="Input Handler" type="Node" parent="." unique_id=452066496 node_paths=PackedStringArray("doll")]
+[node name="Input Handler" type="Node" parent="." unique_id=452066496 node_paths=PackedStringArray("doll", "movement_controller")]
 script = ExtResource("3_1tm35")
 doll = NodePath("..")
+movement_controller = NodePath("../Movement Controller")
 
-[node name="Movement Controller" type="Node" parent="." unique_id=1390720337 node_paths=PackedStringArray("doll", "head", "torso", "feet")]
+[node name="Movement Controller" type="Node" parent="." unique_id=1390720337 node_paths=PackedStringArray("doll", "head", "torso", "feet", "animator", "character_body")]
 script = ExtResource("2_f0113")
 doll = NodePath("..")
 head = NodePath("../Physics Body/Head")
 torso = NodePath("../Physics Body/Torso")
 feet = NodePath("../Physics Body/Feet")
+animator = NodePath("../Ragdoll Animator")
+character_body = NodePath("../Character Body")
 
-[node name="Ragdoll Animator" type="Node" parent="." unique_id=1861148538 node_paths=PackedStringArray("doll", "head", "torso", "hip", "ankle", "feet", "ankle_joint", "hip_joint", "leg", "animated_head", "animated_torso", "animated_feet", "head_drag_joint", "torso_drag_joint", "feet_drag_joint")]
+[node name="Ragdoll Animator" type="Node" parent="." unique_id=1861148538 node_paths=PackedStringArray("doll", "head", "torso", "hip", "ankle", "feet", "ankle_joint", "hip_joint", "leg", "animated_head", "animated_torso", "animated_feet", "head_drag_joint", "torso_drag_joint", "feet_drag_joint", "character_body")]
 script = ExtResource("5_jd47f")
 doll = NodePath("..")
 head = NodePath("../Physics Body/Head")
@@ -73,6 +77,7 @@ animated_feet = NodePath("../Animation Body/Feet")
 head_drag_joint = NodePath("../Animation Body/HeadDragJoint")
 torso_drag_joint = NodePath("../Animation Body/TorsoDragJoint")
 feet_drag_joint = NodePath("../Animation Body/FeetDragJoint")
+character_body = NodePath("../Character Body")
 upright_frame = ExtResource("6_apw8n")
 crouch_frame = ExtResource("7_502nl")
 sit_frame = ExtResource("8_e4xvh")
@@ -83,23 +88,37 @@ roll_frame = ExtResource("12_6fnwk")
 
 [node name="Physics Body" type="Node2D" parent="." unique_id=1094900884]
 
-[node name="Head" type="RigidBody2D" parent="Physics Body" unique_id=2059747671]
+[node name="Head" type="RigidBody2D" parent="Physics Body" unique_id=2059747671 node_paths=PackedStringArray("animator")]
 position = Vector2(0, -375)
 gravity_scale = 0.0
+contact_monitor = true
+max_contacts_reported = 4
+script = ExtResource("13_502nl")
+animator = NodePath("../../Ragdoll Animator")
 
 [node name="Circle" type="CollisionShape2D" parent="Physics Body/Head" unique_id=719094577]
 shape = SubResource("CircleShape2D_m41lp")
 
-[node name="Torso" type="RigidBody2D" parent="Physics Body" unique_id=1426645178]
+[node name="Torso" type="RigidBody2D" parent="Physics Body" unique_id=1426645178 node_paths=PackedStringArray("animator")]
 position = Vector2(0, -280)
 gravity_scale = 0.0
+contact_monitor = true
+max_contacts_reported = 4
+script = ExtResource("13_502nl")
+animator = NodePath("../../Ragdoll Animator")
+component_type = 1
 
 [node name="Rectangle" type="CollisionShape2D" parent="Physics Body/Torso" unique_id=1728090952]
 shape = SubResource("RectangleShape2D_m41lp")
 
-[node name="Feet" type="RigidBody2D" parent="Physics Body" unique_id=308875820]
-position = Vector2(0, -17)
+[node name="Feet" type="RigidBody2D" parent="Physics Body" unique_id=308875820 node_paths=PackedStringArray("animator")]
+position = Vector2(0, -15)
 gravity_scale = 0.0
+contact_monitor = true
+max_contacts_reported = 4
+script = ExtResource("13_502nl")
+animator = NodePath("../../Ragdoll Animator")
+component_type = 2
 
 [node name="Capsule" type="CollisionShape2D" parent="Physics Body/Feet" unique_id=2137399945]
 rotation = 1.5707964
@@ -215,7 +234,7 @@ angular_limit_enabled = true
 [node name="Character Body" type="CharacterBody2D" parent="." unique_id=2085410516]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Character Body" unique_id=524273107]
-position = Vector2(0, -206.75)
+position = Vector2(0, -205)
 shape = SubResource("RectangleShape2D_3ncgx")
 disabled = true
 debug_color = Color(0.9662761, 0, 0.48450154, 0.41960785)

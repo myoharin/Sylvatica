@@ -11,7 +11,7 @@ enum JumpState {
     PRANCE, # standing jump ADDING momentum, valuing speed
 }
 # - Facing Direction: can be modifed manually (and can be funny)
-enum FacingDirection {LEFT, NEUTRAL, RIGHT}
+enum FacingDirection {LEFT = -1, NEUTRAL = 0, RIGHT = 1}
 
 # - Geometry States:
 enum AnimationState {

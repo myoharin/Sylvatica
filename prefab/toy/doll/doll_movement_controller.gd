@@ -8,8 +8,10 @@ class_name DollMovementController extends Node
 @export var head: RigidBody2D 
 @export var torso: RigidBody2D
 @export var feet: RigidBody2D
+# other modules
+@export var animator: DollActiveRagdollAnimator
 # - Dominating Character
-@export var character: CharacterBody2D
+@export var character_body: CharacterBody2D
 
 @export_category("Movement Parameters")
 @export_group("Movent State Parameters")
@@ -19,6 +21,10 @@ class_name DollMovementController extends Node
 @export var movement_hard_landing_time: float = 0.5 # seconds
 @export var movement_stationary_threshold: float = 10 # pixel/second
 @export var coyote_time: float = 0.2 # seconds
+
+@export_group("Walking Parameters")
+@export var movement_walk_speed: float = 100 # pixel/second
+@export var movement_walk_acceleration_weight: float = 0.5
 
 @export_group("Jump Derivatives Parameters")
 @export var base_jump_strength: float = 100 # initial impulse
@@ -39,9 +45,6 @@ enum JumpState {
     POUNCE, # crawl jump
     PRANCE, # standing jump ADDING momentum, valuing speed
 }
-# - Facing Direction: can be modifed manually (and can be funny)
-enum FacingDirection {LEFT, NEUTRAL, RIGHT}
-
 # - Geometry States:
 enum AnimationState {
     UPRIGHT,
@@ -54,27 +57,23 @@ enum AnimationState {
     RAGDOLL
 }
 
-var facing_direction: FacingDirection = FacingDirection.NEUTRAL
+var facing_direction: int = doll.FacingDirection.NEUTRAL
 var jump_state: JumpState = JumpState.NONE
-var geometry_state = AnimationState.UPRIGHT
-
-# Rigid body states
-# - Stablize main physics body, including rotation and location to animated body
-# - stabllization is done using tweens in _physics_process()
-var stablize_head: bool = true
-var stablize_torso: bool = true
-var stablize_feet: bool = true
+var proactive_movement_speed: Vector2 = Vector2.ZERO
+# proactive movement speed includes: walking / jumping
+# does not include not proactive ones like knockback, hard landing
 
 # Movement States: should never be set directly, only via functions
 
 # - basic movement states
-func is_in_motion() -> bool: # NOTDONE
-    return false
-func is_walking() -> bool: # NOTDONE
+
+func is_in_motion() -> bool:
+    return character_body.velocity.length() > movement_stationary_threshold
+func is_walking() -> bool:
     # is on ground
     # is moving
     # need to implement coyote time
-    return false
+    return is_coyote_ground and is_in_motion()
 func is_tapping_wall() -> bool: # NOTDONE
     # feet touching wall
 
@@ -91,6 +90,7 @@ func is_clinging_wall() -> bool: # NOTDONE
 var is_turning: bool = false
 var is_dodging: bool = false
 var is_hard_landed: bool = false
+var is_coyote_ground: bool = false
 
 func trigger_is_turn(duration: float = movement_turning_time):
     is_turning = true
@@ -104,27 +104,56 @@ func trigger_is_hard_land(duration: float = movement_hard_landing_time):
     is_hard_landed = true
     await get_tree().create_timer(duration).timeout
     is_hard_landed = false
+func trigger_coyote_time(duration: float = coyote_time):
+    is_coyote_ground = true
+    await get_tree().create_timer(duration).timeout
+    is_coyote_ground = false
 
 # - Others
 func is_flipping() -> bool:
-    return geometry_state == AnimationState.FLIP
+    return animator.animation_state == AnimationState.FLIP
 func is_rolling() -> bool:
-    return geometry_state == AnimationState.ROLL
+    return animator.animation_state == AnimationState.ROLL
 
 # Init
 
 func _init() -> void:
     pass
 
-# Phyics process
+#  process
+
+func _process(_delta: float) -> void:
+    if Input.is_action_pressed("test_3"):
+        print("Walking Right: ", try_walk_right)
+        print("Walking Left: ", try_walk_left)
+        print("Facing Direction: ", facing_direction)
+
 
 func _physics_process(_delta: float) -> void: # grand controller
-    pass
+    # state checking
+    if character_body.is_on_floor():
+        trigger_coyote_time()
+
+    # walk speed
+    character_body.velocity = character_body.velocity.lerp(
+        Vector2(
+            facing_direction * movement_walk_speed, # determines direction
+            character_body.velocity.y),
+        movement_walk_acceleration_weight) # acceleration
+
+    # movement
+    character_body.velocity = proactive_movement_speed
+    character_body.move_and_slide()
+    
     
 # MovementController
 # - Controller Try
     # called by input handler, these functions that is
     # all jump related input is handled by try jump
+    # operate at the _input() speed level.
+
+var try_walk_right: bool = false
+var try_walk_left: bool = false
 
 func try_up(): # NOTDONE
     pass
@@ -134,13 +163,7 @@ func try_down(): # NOTDONE
     pass
     # including diving down.
     # crouch -> sit / kneel -> crawl
-func try_move_left(): # NOTDONE
-    # walk left / slope
-    pass
-func try_move_right(): # NOTDONE
-    # walk right / up slope
-    pass
-func try_jump(direction_held: bool, direction: FacingDirection = facing_direction): # NOTDONE
+func try_jump(direction_held: bool, direction: int = facing_direction): # NOTDONE
     pass
     # try_flip
         # requires have enough jumps left + turning state
@@ -160,7 +183,7 @@ func try_jump(direction_held: bool, direction: FacingDirection = facing_directio
     # try_roll
         # requires touching ground + hard land
 
-func instant_turn(): # NOTDONE
+func instant_turn():
     # called by input controller directly, easier to detect on input end.
     trigger_is_turn()
 
@@ -172,13 +195,13 @@ func instant_turn(): # NOTDONE
     # should be indepent of input / external factors, but can require parameters.
     # this should also be where the animation call is placed.
     # overall information flow is input -> movement_controller -> ragdoll_animate -> render_animate
-func instant_flip(direction: FacingDirection = facing_direction): # NOTDONE
+func instant_flip(direction: int = facing_direction): # NOTDONE
     pass
-func instant_hop(direction: FacingDirection = facing_direction): # NOTDONE
+func instant_hop(direction: int = facing_direction): # NOTDONE
     pass
-func instant_pounce(direction: FacingDirection = facing_direction): # NOTDONE
+func instant_pounce(direction: int = facing_direction): # NOTDONE
     pass
-func instant_prance(direction: FacingDirection = facing_direction): # NOTDONE
+func instant_prance(direction: int = facing_direction): # NOTDONE
     pass
-func instant_roll(direction: FacingDirection = facing_direction): # NOTDONE
+func instant_roll(direction: int = facing_direction): # NOTDONE
     pass

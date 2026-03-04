@@ -12,6 +12,12 @@ enum JumpState {
 # - Facing Direction: can be modifed manually (and can be funny)
 enum FacingDirection {LEFT, NEUTRAL, RIGHT}
 
+enum RagdollComponentType {
+    HEAD = 0,
+    TORSO = 1,
+    FEET = 2
+}
+
 # - Geometry States:
 enum AnimationState {
     UPRIGHT,
@@ -45,15 +51,7 @@ enum AnimationState {
 @export var torso_drag_joint: PinJoint2D
 @export var feet_drag_joint: PinJoint2D
 
-@export_group("Stablization Parameters")
-@export var feet_stablization_toque_strength: float = 1000
-
-@export var animated_body_follow_strength: float = 5
-@export var keyframe_reaction_threshold: float = 0 # pixel
-@export var ragdoll_angular_sleep_threshold: float = 1 # radians/s
-@export var ragdoll_rotation_sleep_threshold: float = 0.1 # radians/s
-@export var animated_body_force_stablization_threshold: float = 10
-@export var animation_frame_interpolation_weight: float = 0.3
+@export var character_body: CharacterBody2D
 
 @export_group("Geometry State Frames")
 @export var upright_frame: DollAnimationStateFrame
@@ -63,6 +61,10 @@ enum AnimationState {
 @export var crawl_frame: DollAnimationStateFrame
 @export var flip_frame: DollAnimationStateFrame
 @export var roll_frame: DollAnimationStateFrame
+
+@export_group("Stablization Parameters")
+@export var animation_frame_interpolation_weight: float = 0.3
+
 
 # Set ups
 
@@ -112,6 +114,29 @@ func connect_drag_joints() -> void:
     torso_drag_joint.node_b = torso.get_path()
     head_drag_joint.node_b = head.get_path()
 
+# connection functions
+
+func report_ragdoll_component_contact( # NOT DONE
+        type: RagdollComponentType,
+        contact_impulse: Vector2) -> void:
+    
+    var animated_component: StaticBody2D = null
+    var component: RigidBody2D = null
+    match type:
+        RagdollComponentType.HEAD:
+            animated_component = animated_head
+            component = head
+            print("Head contact with impulse: ", contact_impulse)
+        RagdollComponentType.TORSO:
+            animated_component = animated_torso
+            component = torso
+            print("Torso contact with impulse: ", contact_impulse)
+        RagdollComponentType.FEET:
+            animated_component = animated_feet
+            component = feet
+            print("Feet contact with impulse: ", contact_impulse)
+    
+    # animated_component.position += contact_impulse * 0.5 / component.mass
 
 # Processes
 
@@ -124,8 +149,8 @@ func _process(_delta: float) -> void:
         animation_state = (animation_state + 1) % 7 as AnimationState
         print(animation_state)
 
-func _physics_process(delta: float) -> void:
-    # joint conecction and release for testing
+func _physics_process(_delta: float) -> void:
+    # Test: Toggle drag joint activation
     if Input.is_action_just_pressed("test_2"): # toggle drag joints for testing
         if drag_points_connected:
             release_drag_joints()
@@ -135,41 +160,19 @@ func _physics_process(delta: float) -> void:
             print("Drag joints connected, active ragdoll mode")
         drag_points_connected = !drag_points_connected
 
-    # lerp animated body to the ragdolls position
-    for parts in [
-        [head,animated_head], 
-        [torso,animated_torso], 
-        [feet,animated_feet]]:
-
-        var part = parts[0]
-        var animated_part = parts[1]
-        var direction = (part.position - animated_part.position)
-        if direction.length_squared() > keyframe_reaction_threshold:
-            var move_force = direction * animated_body_follow_strength * delta
-            animated_part.position += move_force
-
-    
-
     
     # move animation keyframe to the intended frame of AnimationState (relative to feet)
     var frame = animation_state_to_frame[animation_state]
-    var ragdoll_centre = (
-        feet.position + torso.position + head.position) / 3
-    var anchor_point = Vector2(ragdoll_centre.x, feet.position.y-frame.feet_transform.origin.y)
-    
+    var frame_centre = (
+        frame.head_transform.origin + frame.torso_transform.origin + frame.feet_transform.origin
+        ) / 3.0 
     if animation_state != null:
         # local transform to their parent: `animated_body_root`
         animated_head.transform = animated_head.transform.interpolate_with(
-            frame.head_transform.translated(anchor_point),
+            frame.head_transform.translated(character_body.position),
             animation_frame_interpolation_weight)
         animated_torso.transform = animated_torso.transform.interpolate_with(
-            frame.torso_transform.translated(anchor_point),
-            animation_frame_interpolation_weight)
-        animated_feet.transform = animated_feet.transform.interpolate_with(
-            frame.feet_transform.translated(anchor_point),
+            frame.torso_transform.translated(character_body.position),
             animation_frame_interpolation_weight)
     else: # do nothing, it is ragdoll
         pass #print("Ragdoll state, no animation frame")
-
-func calculate_stablization_toque(angle_diff: float) -> float:
-    return (exp(abs(angle_diff))-1) * feet_stablization_toque_strength
