@@ -5,6 +5,13 @@
 [ext_resource type="Script" uid="uid://dlrs5nhfjtotk" path="res://prefab/toy/doll/doll_movement_controller.gd" id="2_f0113"]
 [ext_resource type="Script" uid="uid://8m61rd66cy3" path="res://prefab/toy/doll/doll_input_handler.gd" id="3_1tm35"]
 [ext_resource type="Script" uid="uid://dt5tecinu27x6" path="res://prefab/toy/doll/doll_active_ragdoll_animator.gd" id="5_jd47f"]
+[ext_resource type="Resource" uid="uid://dev4gfmk6tgse" path="res://asset/toy/doll/default_geommetry_state_frame/upright.tres" id="6_58g6v"]
+[ext_resource type="Resource" uid="uid://bw02cyqb266i0" path="res://asset/toy/doll/default_geommetry_state_frame/crouch.tres" id="6_jd47f"]
+[ext_resource type="Resource" uid="uid://cww0el7s5yvm6" path="res://asset/toy/doll/default_geommetry_state_frame/sit.tres" id="8_r2lo5"]
+[ext_resource type="Resource" uid="uid://bmx2pj357oub" path="res://asset/toy/doll/default_geommetry_state_frame/kneel.tres" id="9_apw8n"]
+[ext_resource type="Resource" uid="uid://dyliyp863iku2" path="res://asset/toy/doll/default_geommetry_state_frame/crawl.tres" id="10_502nl"]
+[ext_resource type="Resource" uid="uid://bmklvhie42vlo" path="res://asset/toy/doll/default_geommetry_state_frame/flip.tres" id="11_e4xvh"]
+[ext_resource type="Resource" uid="uid://fey15mkfb36a" path="res://asset/toy/doll/default_geommetry_state_frame/roll.tres" id="12_apw8n"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_m41lp"]
 radius = 40.0
@@ -61,18 +68,25 @@ animated_head = NodePath("../Animation Body/Head")
 animated_torso = NodePath("../Animation Body/Torso")
 animated_feet = NodePath("../Animation Body/Feet")
 animated_body_force_stablization_threshold = 100.0
+upright_frame = ExtResource("6_58g6v")
+crouch_frame = ExtResource("6_jd47f")
+sit_frame = ExtResource("8_r2lo5")
+kneel_frame = ExtResource("9_apw8n")
+crawl_frame = ExtResource("10_502nl")
+flip_frame = ExtResource("11_e4xvh")
+roll_frame = ExtResource("12_apw8n")
 
 [node name="Physics Body" type="Node2D" parent="." unique_id=1094900884]
 
 [node name="Head" type="RigidBody2D" parent="Physics Body" unique_id=2059747671]
-position = Vector2(1, -375)
+position = Vector2(0, -375)
 gravity_scale = 0.0
 
 [node name="Circle" type="CollisionShape2D" parent="Physics Body/Head" unique_id=719094577]
 shape = SubResource("CircleShape2D_m41lp")
 
 [node name="Torso" type="RigidBody2D" parent="Physics Body" unique_id=1426645178]
-position = Vector2(1, -280)
+position = Vector2(0, -280)
 gravity_scale = 0.0
 
 [node name="Rectangle" type="CollisionShape2D" parent="Physics Body/Torso" unique_id=1728090952]
@@ -81,7 +95,6 @@ shape = SubResource("RectangleShape2D_m41lp")
 [node name="Feet" type="RigidBody2D" parent="Physics Body" unique_id=308875820]
 position = Vector2(0, -17)
 gravity_scale = 0.0
-constant_force = Vector2(0, 100000)
 
 [node name="Capsule" type="CollisionShape2D" parent="Physics Body/Feet" unique_id=2137399945]
 rotation = 1.5707964
@@ -135,7 +148,8 @@ angular_limit_upper = 0.34906584
 [node name="Animation Body" type="Node2D" parent="." unique_id=2076938369]
 
 [node name="Head" type="AnimatableBody2D" parent="Animation Body" unique_id=513057343]
-position = Vector2(1, -375)
+position = Vector2(0, -375)
+rotation = 1.5707964
 
 [node name="Circle" type="CollisionShape2D" parent="Animation Body/Head" unique_id=1137566728]
 shape = SubResource("CircleShape2D_m41lp")
@@ -143,7 +157,7 @@ disabled = true
 debug_color = Color(0.4862745, 0.5764706, 0.2784314, 0.41960785)
 
 [node name="Torso" type="AnimatableBody2D" parent="Animation Body" unique_id=737589749]
-position = Vector2(1, -280)
+position = Vector2(0, -280)
 
 [node name="Rectangle" type="CollisionShape2D" parent="Animation Body/Torso" unique_id=1482522887]
 shape = SubResource("RectangleShape2D_m41lp")
@@ -151,7 +165,7 @@ disabled = true
 debug_color = Color(0.4858191, 0.5781694, 0.27887836, 0.41960785)
 
 [node name="Feet" type="AnimatableBody2D" parent="Animation Body" unique_id=1411680475]
-position = Vector2(0, -17)
+position = Vector2(0, -15)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Animation Body/Feet" unique_id=345733260]
 rotation = 1.5707964
@@ -159,13 +173,13 @@ shape = SubResource("CapsuleShape2D_jd47f")
 disabled = true
 
 [node name="HeadDragJoint" type="PinJoint2D" parent="Animation Body" unique_id=599567187]
-position = Vector2(1, -375)
+position = Vector2(0, -375)
 node_a = NodePath("../Head")
 node_b = NodePath("../../Physics Body/Head")
 softness = 1.0
 
 [node name="TorsoDragJoint" type="PinJoint2D" parent="Animation Body" unique_id=403238918]
-position = Vector2(1, -280)
+position = Vector2(0, -280)
 node_a = NodePath("../Torso")
 node_b = NodePath("../../Physics Body/Torso")
 softness = 1.0

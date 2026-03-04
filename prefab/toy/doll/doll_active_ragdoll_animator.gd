@@ -41,6 +41,7 @@ enum AnimationState {
 @export var animated_torso: StaticBody2D
 @export var animated_feet: StaticBody2D
 
+@export_group("Stablization Parameters")
 @export var feet_stablization_toque_strength: float = 1000
 
 @export var animated_body_follow_strength: float = 5
@@ -49,8 +50,26 @@ enum AnimationState {
 @export var ragdoll_rotation_sleep_threshold: float = 0.1 # radians/s
 @export var animated_body_force_stablization_threshold: float = 10
 
+@export_group("Geometry State Frames")
+@export var upright_frame: DollGeometryStateFrame
+@export var crouch_frame: DollGeometryStateFrame
+@export var sit_frame: DollGeometryStateFrame
+@export var kneel_frame: DollGeometryStateFrame
+@export var crawl_frame: DollGeometryStateFrame
+@export var flip_frame: DollGeometryStateFrame
+@export var roll_frame: DollGeometryStateFrame
+
 # internal variables
 
+var geometry_state_to_frame = { # mapping
+    AnimationState.UPRIGHT: upright_frame,
+    AnimationState.CROUCH: crouch_frame,
+    AnimationState.SIT: sit_frame,
+    AnimationState.KNEEL: kneel_frame,
+    AnimationState.CRAWL: crawl_frame,
+    AnimationState.FLIP: flip_frame,
+    AnimationState.ROLL: null
+}
 var facing_direction: FacingDirection = FacingDirection.NEUTRAL
 var jump_state: JumpState = JumpState.NONE
 var geometry_state = AnimationState.UPRIGHT
@@ -65,10 +84,10 @@ var stablize_feet: bool = true
 var animated_feet_last_pos = Vector2(0,0)
 
 func _process(delta: float) -> void:
-    pass
+    if Input.is_action_just_pressed("test_1"):
+        geometry_state = GeometryState(geometry_state + 1)
 
 func _physics_process(delta: float) -> void:
-    pass
     # move keyframe to the feet
     var direction = (feet.position - animated_feet.position)
     if direction.length_squared() > keyframe_reaction_threshold:
