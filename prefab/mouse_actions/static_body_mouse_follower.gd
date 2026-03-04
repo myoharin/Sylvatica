@@ -5,7 +5,7 @@ extends StaticBody2D
 var last_position: Vector2 = position
 
 func _physics_process(delta: float) -> void:
-    constant_linear_velocity = (position - last_position) / delta
+    constant_linear_velocity = (position - last_position) / delta * 0.2
     last_position = position
     position = position.lerp(get_global_mouse_position(), tenacity)
 

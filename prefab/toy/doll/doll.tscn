@@ -5,13 +5,13 @@
 [ext_resource type="Script" uid="uid://dlrs5nhfjtotk" path="res://prefab/toy/doll/doll_movement_controller.gd" id="2_f0113"]
 [ext_resource type="Script" uid="uid://8m61rd66cy3" path="res://prefab/toy/doll/doll_input_handler.gd" id="3_1tm35"]
 [ext_resource type="Script" uid="uid://dt5tecinu27x6" path="res://prefab/toy/doll/doll_active_ragdoll_animator.gd" id="5_jd47f"]
-[ext_resource type="Resource" uid="uid://dev4gfmk6tgse" path="res://asset/toy/doll/default_geommetry_state_frame/upright.tres" id="6_58g6v"]
-[ext_resource type="Resource" uid="uid://bw02cyqb266i0" path="res://asset/toy/doll/default_geommetry_state_frame/crouch.tres" id="6_jd47f"]
-[ext_resource type="Resource" uid="uid://cww0el7s5yvm6" path="res://asset/toy/doll/default_geommetry_state_frame/sit.tres" id="8_r2lo5"]
-[ext_resource type="Resource" uid="uid://bmx2pj357oub" path="res://asset/toy/doll/default_geommetry_state_frame/kneel.tres" id="9_apw8n"]
-[ext_resource type="Resource" uid="uid://dyliyp863iku2" path="res://asset/toy/doll/default_geommetry_state_frame/crawl.tres" id="10_502nl"]
-[ext_resource type="Resource" uid="uid://bmklvhie42vlo" path="res://asset/toy/doll/default_geommetry_state_frame/flip.tres" id="11_e4xvh"]
-[ext_resource type="Resource" uid="uid://fey15mkfb36a" path="res://asset/toy/doll/default_geommetry_state_frame/roll.tres" id="12_apw8n"]
+[ext_resource type="Resource" uid="uid://dbx80uhckacps" path="res://asset/toy/doll/default_animation_state_frame/upright.tres" id="6_apw8n"]
+[ext_resource type="Resource" uid="uid://bj2bmd7xa3qy8" path="res://asset/toy/doll/default_animation_state_frame/crouch.tres" id="7_502nl"]
+[ext_resource type="Resource" uid="uid://bbhlgc6746sjo" path="res://asset/toy/doll/default_animation_state_frame/sit.tres" id="8_e4xvh"]
+[ext_resource type="Resource" uid="uid://cc6ovijawqm31" path="res://asset/toy/doll/default_animation_state_frame/kneel.tres" id="9_k7t3v"]
+[ext_resource type="Resource" uid="uid://csc1al2t8wr2e" path="res://asset/toy/doll/default_animation_state_frame/crawl.tres" id="10_kv2t5"]
+[ext_resource type="Resource" uid="uid://8vrkqeirx3ux" path="res://asset/toy/doll/default_animation_state_frame/flip.tres" id="11_1rl44"]
+[ext_resource type="Resource" uid="uid://cv8kb20koc6vv" path="res://asset/toy/doll/default_animation_state_frame/roll.tres" id="12_6fnwk"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_m41lp"]
 radius = 40.0
@@ -33,10 +33,13 @@ height = 70.0
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3ncgx"]
 size = Vector2(63, 409.5)
 
-[node name="Doll" type="Node2D" unique_id=1212199156 node_paths=PackedStringArray("input_handler")]
+[node name="Doll" type="Node2D" unique_id=1212199156 node_paths=PackedStringArray("ragdoll_animator", "input_handler", "movement_controller", "procedural_renderer")]
 physics_interpolation_mode = 2
 script = ExtResource("1_76dj2")
+ragdoll_animator = NodePath("Ragdoll Animator")
 input_handler = NodePath("Input Handler")
+movement_controller = NodePath("Movement Controller")
+procedural_renderer = NodePath("Procedural Renderer")
 
 [node name="Procedural Renderer" type="Node" parent="." unique_id=1969546211 node_paths=PackedStringArray("doll")]
 script = ExtResource("2_3ncgx")
@@ -53,7 +56,7 @@ head = NodePath("../Physics Body/Head")
 torso = NodePath("../Physics Body/Torso")
 feet = NodePath("../Physics Body/Feet")
 
-[node name="Ragdoll Animator" type="Node" parent="." unique_id=1861148538 node_paths=PackedStringArray("doll", "head", "torso", "hip", "ankle", "feet", "ankle_joint", "hip_joint", "leg", "animated_head", "animated_torso", "animated_feet")]
+[node name="Ragdoll Animator" type="Node" parent="." unique_id=1861148538 node_paths=PackedStringArray("doll", "head", "torso", "hip", "ankle", "feet", "ankle_joint", "hip_joint", "leg", "animated_head", "animated_torso", "animated_feet", "head_drag_joint", "torso_drag_joint", "feet_drag_joint")]
 script = ExtResource("5_jd47f")
 doll = NodePath("..")
 head = NodePath("../Physics Body/Head")
@@ -67,14 +70,16 @@ leg = NodePath("../Physics Body/Leg")
 animated_head = NodePath("../Animation Body/Head")
 animated_torso = NodePath("../Animation Body/Torso")
 animated_feet = NodePath("../Animation Body/Feet")
-animated_body_force_stablization_threshold = 100.0
-upright_frame = ExtResource("6_58g6v")
-crouch_frame = ExtResource("6_jd47f")
-sit_frame = ExtResource("8_r2lo5")
-kneel_frame = ExtResource("9_apw8n")
-crawl_frame = ExtResource("10_502nl")
-flip_frame = ExtResource("11_e4xvh")
-roll_frame = ExtResource("12_apw8n")
+head_drag_joint = NodePath("../Animation Body/HeadDragJoint")
+torso_drag_joint = NodePath("../Animation Body/TorsoDragJoint")
+feet_drag_joint = NodePath("../Animation Body/FeetDragJoint")
+upright_frame = ExtResource("6_apw8n")
+crouch_frame = ExtResource("7_502nl")
+sit_frame = ExtResource("8_e4xvh")
+kneel_frame = ExtResource("9_k7t3v")
+crawl_frame = ExtResource("10_kv2t5")
+flip_frame = ExtResource("11_1rl44")
+roll_frame = ExtResource("12_6fnwk")
 
 [node name="Physics Body" type="Node2D" parent="." unique_id=1094900884]
 
@@ -102,18 +107,24 @@ shape = SubResource("CapsuleShape2D_3ncgx")
 debug_color = Color(0, 0.6, 0.7019608, 0.41960785)
 
 [node name="Neck Joint" type="PinJoint2D" parent="Physics Body" unique_id=2087407505]
-position = Vector2(0, -323)
+visible = false
+position = Vector2(0, -375)
 node_a = NodePath("../Head")
 node_b = NodePath("../Torso")
 disable_collision = false
+angular_limit_enabled = true
+angular_limit_lower = -0.7853982
+angular_limit_upper = 0.7853982
 
 [node name="Hip Joint" type="PinJoint2D" parent="Physics Body" unique_id=2140572891]
+visible = false
 position = Vector2(0, -210)
 node_a = NodePath("../Hip")
 node_b = NodePath("../Torso")
 disable_collision = false
-angular_limit_lower = -0.34906584
-angular_limit_upper = 0.34906584
+angular_limit_enabled = true
+angular_limit_lower = -1.5707964
+angular_limit_upper = 1.5707964
 
 [node name="Hip" type="RigidBody2D" parent="Physics Body" unique_id=1268924032]
 position = Vector2(0, -210)
@@ -130,6 +141,7 @@ shape = SubResource("CircleShape2D_5t14u")
 disabled = true
 
 [node name="Leg" type="GrooveJoint2D" parent="Physics Body" unique_id=931205586]
+visible = false
 position = Vector2(0, -210)
 node_a = NodePath("../Hip")
 node_b = NodePath("../Ankle")
@@ -138,12 +150,14 @@ length = 150.0
 initial_offset = 150.0
 
 [node name="Ankle Joint" type="PinJoint2D" parent="Physics Body" unique_id=399740015]
+visible = false
 position = Vector2(0, -59)
 node_a = NodePath("../Ankle")
 node_b = NodePath("../Feet")
 disable_collision = false
-angular_limit_lower = -0.34906584
-angular_limit_upper = 0.34906584
+angular_limit_enabled = true
+angular_limit_lower = -1.5707964
+angular_limit_upper = 1.5707964
 
 [node name="Animation Body" type="Node2D" parent="." unique_id=2076938369]
 
@@ -172,25 +186,31 @@ rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_jd47f")
 disabled = true
 
+[node name="FeetDragJoint" type="PinJoint2D" parent="Animation Body" unique_id=1024208130]
+visible = false
+position = Vector2(0, -15)
+node_a = NodePath("../Feet")
+node_b = NodePath("../../Physics Body/Feet")
+softness = 1.0
+angular_limit_enabled = true
+angular_limit_lower = -0.2617994
+angular_limit_upper = 0.2617994
+
 [node name="HeadDragJoint" type="PinJoint2D" parent="Animation Body" unique_id=599567187]
+visible = false
 position = Vector2(0, -375)
 node_a = NodePath("../Head")
 node_b = NodePath("../../Physics Body/Head")
 softness = 1.0
+angular_limit_enabled = true
 
 [node name="TorsoDragJoint" type="PinJoint2D" parent="Animation Body" unique_id=403238918]
+visible = false
 position = Vector2(0, -280)
 node_a = NodePath("../Torso")
 node_b = NodePath("../../Physics Body/Torso")
 softness = 1.0
-
-[node name="FeetDragJoint" type="PinJoint2D" parent="Animation Body" unique_id=1024208130]
-position = Vector2(0, -17)
-node_a = NodePath("../Feet")
-node_b = NodePath("../../Physics Body/Feet")
-softness = 1.0
-angular_limit_lower = -0.2617994
-angular_limit_upper = 0.2617994
+angular_limit_enabled = true
 
 [node name="Character Body" type="CharacterBody2D" parent="." unique_id=2085410516]
 

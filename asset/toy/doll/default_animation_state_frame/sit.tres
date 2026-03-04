@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="DollAnimationStateFrame" format=3 uid="uid://bbhlgc6746sjo"]
+
+[ext_resource type="Script" uid="uid://bf6x5ear3if5c" path="res://prefab/toy/doll/resource/doll_animation_state_frame.gd" id="1_07i1h"]
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_07i1h")
+head_transform = Transform2D(1, 0, 0, 1, -100, -190)
+torso_transform = Transform2D(1, 0, 0, 1, -100, -95)
+rotation_lock = true

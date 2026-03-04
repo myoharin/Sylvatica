@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="DollAnimationStateFrame" format=3 uid="uid://dbx80uhckacps"]
+
+[ext_resource type="Script" uid="uid://bf6x5ear3if5c" path="res://prefab/toy/doll/resource/doll_animation_state_frame.gd" id="1_g7dvg"]
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_g7dvg")
+rotation_lock = true
