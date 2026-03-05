@@ -12,9 +12,11 @@ size = Vector2(100, 30)
 
 [node name="Root" type="Node2D" unique_id=576160865]
 
-[node name="Floor" type="StaticBody2D" parent="." unique_id=684902715]
+[node name="Floor" type="StaticBody2D" parent="." unique_id=684902715 groups=["static_blocks"]]
+collision_layer = 7
+collision_mask = 7
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor" unique_id=1886453337]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor" unique_id=1886453337 groups=["static_blocks"]]
 position = Vector2(0, 10)
 shape = SubResource("RectangleShape2D_soann")
 

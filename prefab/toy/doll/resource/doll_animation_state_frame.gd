@@ -6,11 +6,13 @@ extends Resource
 @export var feet_transform: Transform2D = Transform2D(0, Vector2(0, -15))
 @export var rotation_lock: bool = false
 
-func _init(head_trans: Transform2D = head_transform, 
-		torso_trans: Transform2D = torso_transform, 
-		feet_trans: Transform2D = feet_transform, 
-		is_rotation_lock: bool = false) -> void:
-	head_transform = head_trans
-	torso_transform = torso_trans
-	feet_transform = feet_trans
-	rotation_lock = is_rotation_lock
+func _init() -> void:
+	pass
+
+func clone() -> DollAnimationStateFrame:
+	var new_frame = DollAnimationStateFrame.new()
+	new_frame.head_transform = Transform2D(head_transform)
+	new_frame.torso_transform = Transform2D(torso_transform)
+	new_frame.feet_transform = Transform2D(feet_transform)
+	new_frame.rotation_lock = rotation_lock
+	return new_frame

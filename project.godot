@@ -15,6 +15,10 @@ run/main_scene="uid://dynu3anjasu7h"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
+[global_group]
+
+static_blocks="blocks which are static objects"
+
 [input]
 
 ui_left={

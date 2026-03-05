@@ -14,6 +14,9 @@
 [ext_resource type="Resource" uid="uid://cv8kb20koc6vv" path="res://asset/toy/doll/default_animation_state_frame/roll.tres" id="12_6fnwk"]
 [ext_resource type="Script" uid="uid://d05jbuyu0ye83" path="res://prefab/toy/doll/doll_ragdoll_component.gd" id="13_502nl"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3ncgx"]
+size = Vector2(63, 409.5)
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_m41lp"]
 radius = 40.0
 
@@ -30,9 +33,6 @@ radius = 15.0
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_jd47f"]
 radius = 15.0
 height = 70.0
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_3ncgx"]
-size = Vector2(63, 409.5)
 
 [node name="Doll" type="Node2D" unique_id=1212199156 node_paths=PackedStringArray("ragdoll_animator", "input_handler", "movement_controller", "procedural_renderer")]
 physics_interpolation_mode = 2
@@ -85,6 +85,15 @@ kneel_frame = ExtResource("9_k7t3v")
 crawl_frame = ExtResource("10_kv2t5")
 flip_frame = ExtResource("11_1rl44")
 roll_frame = ExtResource("12_6fnwk")
+
+[node name="Character Body" type="CharacterBody2D" parent="." unique_id=2085410516]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Character Body" unique_id=524273107]
+position = Vector2(0, -205)
+shape = SubResource("RectangleShape2D_3ncgx")
+debug_color = Color(0.9647059, 0, 0.4862745, 0.15686275)
 
 [node name="Physics Body" type="Node2D" parent="." unique_id=1094900884]
 
@@ -183,6 +192,8 @@ angular_limit_upper = 1.5707964
 [node name="Head" type="AnimatableBody2D" parent="Animation Body" unique_id=513057343]
 position = Vector2(0, -375)
 rotation = 1.5707964
+collision_layer = 7
+collision_mask = 7
 
 [node name="Circle" type="CollisionShape2D" parent="Animation Body/Head" unique_id=1137566728]
 shape = SubResource("CircleShape2D_m41lp")
@@ -191,6 +202,8 @@ debug_color = Color(0.4862745, 0.5764706, 0.2784314, 0.41960785)
 
 [node name="Torso" type="AnimatableBody2D" parent="Animation Body" unique_id=737589749]
 position = Vector2(0, -280)
+collision_layer = 7
+collision_mask = 7
 
 [node name="Rectangle" type="CollisionShape2D" parent="Animation Body/Torso" unique_id=1482522887]
 shape = SubResource("RectangleShape2D_m41lp")
@@ -199,6 +212,8 @@ debug_color = Color(0.4858191, 0.5781694, 0.27887836, 0.41960785)
 
 [node name="Feet" type="AnimatableBody2D" parent="Animation Body" unique_id=1411680475]
 position = Vector2(0, -15)
+collision_layer = 7
+collision_mask = 7
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Animation Body/Feet" unique_id=345733260]
 rotation = 1.5707964
@@ -210,7 +225,7 @@ visible = false
 position = Vector2(0, -15)
 node_a = NodePath("../Feet")
 node_b = NodePath("../../Physics Body/Feet")
-softness = 1.0
+softness = 0.1
 angular_limit_enabled = true
 angular_limit_lower = -0.2617994
 angular_limit_upper = 0.2617994
@@ -220,7 +235,7 @@ visible = false
 position = Vector2(0, -375)
 node_a = NodePath("../Head")
 node_b = NodePath("../../Physics Body/Head")
-softness = 1.0
+softness = 0.1
 angular_limit_enabled = true
 
 [node name="TorsoDragJoint" type="PinJoint2D" parent="Animation Body" unique_id=403238918]
@@ -228,13 +243,5 @@ visible = false
 position = Vector2(0, -280)
 node_a = NodePath("../Torso")
 node_b = NodePath("../../Physics Body/Torso")
-softness = 1.0
+softness = 0.1
 angular_limit_enabled = true
-
-[node name="Character Body" type="CharacterBody2D" parent="." unique_id=2085410516]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Character Body" unique_id=524273107]
-position = Vector2(0, -205)
-shape = SubResource("RectangleShape2D_3ncgx")
-disabled = true
-debug_color = Color(0.9662761, 0, 0.48450154, 0.41960785)

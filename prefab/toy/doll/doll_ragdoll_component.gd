@@ -22,7 +22,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
         var collider = state.get_contact_collider_object(i)
         var contact_impulse = state.get_contact_impulse(i)
         
-        print("Contact ", i, " at: ", contact_pos, " with: ", collider)
+        # print("Contact ", i, " at: ", contact_pos, " with: ", collider)
 
         # Report it.
         animator.report_ragdoll_component_contact(
