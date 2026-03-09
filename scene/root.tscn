@@ -35,6 +35,8 @@ position = Vector2(-3, -53)
 
 [node name="Follower" type="StaticBody2D" parent="." unique_id=1723574883]
 position = Vector2(126, -190)
+collision_layer = 7
+collision_mask = 7
 script = ExtResource("3_iefuh")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Follower" unique_id=282893224]

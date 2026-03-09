@@ -2,10 +2,13 @@
 | pseudoname | description                                       |
 | ---------- | :------------------------------------------------ |
 | `toy`      | Ingame Entities / Objects                         |
-| `block`    | Coded Entities / Stageset                         |
-| `doll`     | Player Character                                  |
-| `plush`    | Creatures with creature ai                        |
-| `sticker`  | Additional modules to decorate a toy's capability |
+| `toy.block`    | Coded interactable Entities / Stageset                         |
+| `toy.doll`     | Player Character                                  |
+| `toy.plush`    | Creatures with creature ai                        |
+| `toy.sticker`  | ??? |
+|``||
+|||
+|||
 
 # Layer Mask Planning
 | object types   | layer | mask  |
@@ -19,6 +22,6 @@
 | Layer | description                                                    |
 | :---- | :------------------------------------------------------------- |
 | 1     | ragdoll layer: meant for messy use cases and react to stageste |
-| 2     |
+| 2     | character layers: where core hitbox stays
 | 3     | real layer: where                                              |
     

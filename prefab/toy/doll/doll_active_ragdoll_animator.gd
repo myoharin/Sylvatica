@@ -1,43 +1,15 @@
 class_name DollActiveRagdollAnimator
 extends Node
 
-# - Jump Types
-enum JumpState {
-    NONE, # when no jumps are initiated
-    FLIP, # spin jump
-    HOP, # standing jump with no momentum, valuing maintaing stability
-    POUNCE, # crawl jump
-    PRANCE, # standing jump ADDING momentum, valuing speed
-}
-# - Facing Direction: can be modifed manually (and can be funny)
-
-enum RagdollComponentType {
-    HEAD = 0,
-    TORSO = 1,
-    FEET = 2
-}
-
-# - Geometry States:
-enum AnimationState {
-    UPRIGHT,
-    CROUCH,
-    SIT,
-    KNEEL,
-    CRAWL,
-    FLIP,
-    ROLL,
-    RAGDOLL
-}
-
 var unturnable_states = [
-        AnimationState.CRAWL,
-        AnimationState.KNEEL,
-        AnimationState.SIT,
+        doll.AnimationState.CRAWL,
+        doll.AnimationState.KNEEL,
+        doll.AnimationState.SIT,
     ]
 var unjumpable_states = [
-    AnimationState.CRAWL,
-    AnimationState.RAGDOLL,
-    AnimationState.SIT
+    doll.AnimationState.CRAWL,
+    doll.AnimationState.RAGDOLL,
+    doll.AnimationState.SIT
 ]
 
 @export_group("Reference Nodes")
@@ -62,6 +34,7 @@ var unjumpable_states = [
 @export var feet_drag_joint: PinJoint2D
 
 @export var character_body: CharacterBody2D
+@export var character_shape: CollisionShape2D
 
 @export_group("Geometry State Frames")
 @export var upright_frame: DollAnimationStateFrame
@@ -80,45 +53,57 @@ var unjumpable_states = [
 
 @onready
 var animation_state_to_frame = { # mapping
-    AnimationState.UPRIGHT: upright_frame,
-    AnimationState.CROUCH: crouch_frame,
-    AnimationState.SIT: sit_frame,
-    AnimationState.KNEEL: kneel_frame,
-    AnimationState.CRAWL: crawl_frame,
-    AnimationState.FLIP: flip_frame,
-    AnimationState.ROLL: roll_frame,
-    AnimationState.RAGDOLL: null, # no animation frame, pure ragdoll
+    doll.AnimationState.UPRIGHT: upright_frame,
+    doll.AnimationState.CROUCH: crouch_frame,
+    doll.AnimationState.SIT: sit_frame,
+    doll.AnimationState.KNEEL: kneel_frame,
+    doll.AnimationState.CRAWL: crawl_frame,
+    doll.AnimationState.FLIP: flip_frame,
+    doll.AnimationState.ROLL: roll_frame,
+    doll.AnimationState.RAGDOLL: null, # no animation frame, pure ragdoll
 }
 
 # variables
 
 var facing_direction: int = doll.FacingDirection.NEUTRAL
 var last_facing_direction: int = doll.FacingDirection.RIGHT
-var jump_state: JumpState = JumpState.NONE
-var animation_state = AnimationState.UPRIGHT # deafult
+var animation_state = doll.AnimationState.UPRIGHT as int # deafult
 var drag_points_connected: bool = true
+
+var awaiting_animation_state: int = -1 # doll.AnimationState
 
 # functions
 
-func change_animation_state(new_state: int) -> void:
-    animation_state = new_state as AnimationState # no question asked
-    if animation_state == AnimationState.RAGDOLL:
-        release_drag_joints()
+func call_change_animation_state(new_state: int) -> void:
+    awaiting_animation_state = new_state
+# done within physics tick
+func _change_animation_state(new_state: int) -> void:
+    animation_state = new_state # no question asked
+    if animation_state == doll.AnimationState.RAGDOLL:
+        _release_drag_joints()
     else:
-        connect_drag_joints()
+        _connect_drag_joints()
     if unturnable_states.has(animation_state):
         facing_direction = last_facing_direction
-
-func release_drag_joints() -> void:
+# done within physics tick
+func _release_drag_joints() -> void:
     feet_drag_joint.node_b = ""
     torso_drag_joint.node_b = ""
     head_drag_joint.node_b = ""
-
-func connect_drag_joints() -> void:
+# done within physics tick
+func _connect_drag_joints() -> void:
     # move ragdoll parts to the animated body position
-    animated_head.global_transform = head.global_transform
-    animated_torso.global_transform = torso.global_transform
-    animated_feet.global_transform = feet.global_transform
+    animated_head.transform = head.transform
+    animated_torso.transform = torso.transform
+    animated_feet.transform = feet.transform
+
+    print(animated_head.transform)
+    print(head.transform)
+    print(animated_torso.transform)
+    print(torso.transform)
+    print(animated_feet.transform)
+    print(feet.transform)
+
 
     # connect joints
     feet_drag_joint.node_b = feet.get_path()
@@ -128,21 +113,21 @@ func connect_drag_joints() -> void:
 # connection functions
 
 func report_ragdoll_component_contact( # NOT DONE
-        type: RagdollComponentType,
-        contact_impulse: Vector2) -> void:
+        type: int, # doll.AnimationState
+        _contact_impulse: Vector2) -> void:
     
     var animated_component: StaticBody2D = null
     var component: RigidBody2D = null
     match type:
-        RagdollComponentType.HEAD:
+        doll.RagdollComponentType.HEAD:
             animated_component = animated_head
             component = head
             # print("Head contact with impulse: ", contact_impulse)
-        RagdollComponentType.TORSO:
+        doll.RagdollComponentType.TORSO:
             animated_component = animated_torso
             component = torso
             # print("Torso contact with impulse: ", contact_impulse)
-        RagdollComponentType.FEET:
+        doll.RagdollComponentType.FEET:
             animated_component = animated_feet
             component = feet
             # print("Feet contact with impulse: ", contact_impulse)
@@ -152,12 +137,13 @@ func report_ragdoll_component_contact( # NOT DONE
 # Processes
 
 func _init() -> void:
+    connect_drag_joints()
     pass
 
 
 func _process(_delta: float) -> void:
     if Input.is_action_just_pressed("test_1"): # cycle through animation states for testing
-        animation_state = (animation_state + 1) % 7 as AnimationState
+        animation_state = (animation_state + 1) % len(doll.AnimationState)
         print(animation_state)
 
 func _physics_process(_delta: float) -> void:
@@ -178,18 +164,16 @@ func _physics_process(_delta: float) -> void:
 
     
     # move animation keyframe to the intended frame of AnimationState (relative to feet)
-    var frame = (
-        animation_state_to_frame[animation_state] as DollAnimationStateFrame
-    ).clone()
+    var frame = (animation_state_to_frame[animation_state] as DollAnimationStateFrame)
+    if frame != null:
+        frame = frame.clone()
+         # - invert x for direction purposes
+        var facing_direction_multiplier = last_facing_direction
+        
+        frame.head_transform.origin.x *= facing_direction_multiplier
+        frame.torso_transform.origin.x *= facing_direction_multiplier
+        frame.feet_transform.origin.x *= facing_direction_multiplier
 
-    # invert x for direction purposes
-    var facing_direction_multiplier = last_facing_direction
-    
-    frame.head_transform.origin.x *= facing_direction_multiplier
-    frame.torso_transform.origin.x *= facing_direction_multiplier
-    frame.feet_transform.origin.x *= facing_direction_multiplier
-
-    if animation_state != null:
         # local transform to their parent: `animated_body_root`
         animated_head.transform = animated_head.transform.interpolate_with(
             frame.head_transform.translated(character_body.position),
@@ -201,4 +185,14 @@ func _physics_process(_delta: float) -> void:
             frame.feet_transform.translated(character_body.position),
             animation_frame_interpolation_weight)
     else: # do nothing, it is ragdoll
-        pass #print("Ragdoll state, no animation frame")
+        # print("Ragdoll state, no animation frame")
+        pass
+
+    # - Alter character_body hitbox
+    var newshape: RectangleShape2D = character_shape.shape.duplicate_deep()
+    newshape.size = newshape.size.lerp(frame.hitbox_size, pow(0.5, 0.8*_delta))
+    character_shape.shape = newshape
+    var target_position = Vector2(0, newshape.size.y * -0.5)
+    character_shape.position = character_shape.position.lerp(
+        target_position, pow(0.5, 0.8*_delta))
+    

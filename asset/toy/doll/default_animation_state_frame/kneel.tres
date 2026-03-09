@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_1ivyw")
-head_transform = Transform2D(1, 0, 0, 1, -30, -175)
-torso_transform = Transform2D(1, 0, 0, 1, -65, -80)
+head_transform = Transform2D(1, 0, 0, 1, 60, -200)
+torso_transform = Transform2D(1, 0, 0, 1, 60, -100)
 rotation_lock = true

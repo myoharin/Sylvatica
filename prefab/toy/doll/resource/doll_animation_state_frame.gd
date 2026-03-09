@@ -5,6 +5,7 @@ extends Resource
 @export var torso_transform: Transform2D = Transform2D(0, Vector2(0, -280))
 @export var feet_transform: Transform2D = Transform2D(0, Vector2(0, -15))
 @export var rotation_lock: bool = false
+@export var hitbox_size: Vector2 = Vector2(60, 410)
 
 func _init() -> void:
 	pass

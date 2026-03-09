@@ -5,6 +5,7 @@
 [resource]
 resource_local_to_scene = true
 script = ExtResource("1_jcsqd")
-head_transform = Transform2D(1, 0, 0, 1, 0, -230)
-torso_transform = Transform2D(1, 0, 0, 1, 0, -135)
+head_transform = Transform2D(1, 0, 0, 1, 0, -240)
+torso_transform = Transform2D(1, 0, 0, 1, 0, -145)
 rotation_lock = true
+hitbox_size = Vector2(60, 210)

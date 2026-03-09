@@ -36,18 +36,6 @@ class_name DollMovementController extends Node
 @export var prance_velocity: Vector2 = Vector2(1.5,1)
 
 
-var try_stand_states = {
-        animator.AnimationState.CRAWL: animator.AnimationState.SIT,
-        animator.AnimationState.SIT: animator.AnimationState.CROUCH,
-        animator.AnimationState.KNEEL: animator.AnimationState.CROUCH,
-        animator.AnimationState.CROUCH: animator.AnimationState.UPRIGHT
-    }
-var try_crouch_states = { # directly pressing down
-        animator.AnimationState.UPRIGHT: animator.AnimationState.CROUCH,
-        animator.AnimationState.CROUCH: animator.AnimationState.KNEEL,
-        animator.AnimationState.SIT: animator.AnimationState.CRAWL
-    }
-
 # internal variables
 
 # - Jump Types
@@ -61,6 +49,9 @@ enum JumpState {
 
 var jump_state: JumpState = JumpState.NONE
 var proactive_movement_speed: Vector2 = Vector2.ZERO
+var jump_released: bool = false # whether the jump has been released early, for variable jump height
+var facing_direction: int = doll.FacingDirection.NEUTRAL
+var last_facing_direction: int = doll.FacingDirection.RIGHT
 
 # proactive movement speed includes: walking / jumping
 # does not include not proactive ones like knockback, hard landing
@@ -126,11 +117,14 @@ func _init() -> void:
 
 func _process(_delta: float) -> void:
     if Input.is_action_pressed("test_3"):
-        print("Walking: ", try_walk)
+        print("Try Walking: ", try_walk)
+        print("Try Walk Direction: ", try_walk_direction)
         print("Facing Direction: ", animator.facing_direction)
         print("Last Facing Direction: ", animator.last_facing_direction)
         print("Body Velocity: ", character_body.velocity)
         print("Coyote Ground: ", is_coyote_ground())
+        print("Animation State: ", doll.animation_state_names[
+            animator.animation_state])
 
     if is_turning():
         print("Turning! " + str(is_turning_frames))
@@ -145,13 +139,14 @@ func _physics_process(_delta: float) -> void: # grand controller
     if character_body.is_on_floor():
         trigger_coyote_time()
         character_body.velocity.y = 0
+        jump_released = false
 
     # state timers
     is_turning_frames -= 1 * int(is_turning())
     is_dodging_frames -= 1 * int(is_dodging())
     is_hard_landed_frames -= 1 * int(is_hard_landed())
     is_coyote_ground_frames -= 1 * int(is_coyote_ground())
-    movement_crouch_stand_cooldown_frames -= 1 * int(not is_crouch_stand_cooled())
+    movement_crouch_stand_cooldown_frames -= 1 * int(movement_crouch_stand_cooldown_frames > 0)
 
     # movement
     accelerate_character_velocities_half(_delta)
@@ -168,8 +163,9 @@ func accelerate_character_velocities_half(_delta: float) -> void:
     # - walk speed
     proactive_movement_speed = character_body.velocity.lerp(
         Vector2(
-            try_walk_direction * movement_walk_speed * int(try_walk), # determines direction
-            character_body.velocity.y),
+            try_walk_direction * movement_walk_speed * ( # determines direction
+                int(try_walk) * pow(0.2, int(jump_released))), # conditions
+            0), # 0 vertical velocity from this 
         pow(0.5, _delta * movement_walk_acceleration_speed)) # lerp-acceleration
 
 
@@ -183,37 +179,58 @@ func accelerate_character_velocities_half(_delta: float) -> void:
 # - Controller Try
     # called by input handler, these functions that is
     # all jump related input is handled by try jump
-    # operate at the _input() speed level.
+    # operate at the _input() speed level, doesn ot allign with physics frame
 
 var try_walk: bool = false
 var try_walk_direction: int = doll.FacingDirection.RIGHT
 
+
 func try_face_direction(direction: int) -> void:
-    var success: bool = animator.unturnable_states.has(animator.animation_state)
+    var success: bool = not animator.unturnable_states.has(animator.animation_state as int)
     # booleanise if statement
     animator.facing_direction = direction * int(success) + (
         animator.facing_direction * int(not success))
 
 func try_stand(_up_held: bool): # NOTDONE - held interaction
     # state change change
-    if is_crouch_stand_cooled() and try_stand_states.has(animator.animation_state):
-        if animator.animation_state == animator.AnimationState.CRAWL:
+    if is_crouch_stand_cooled() and doll.try_stand_states.has(animator.animation_state):
+        if animator.animation_state == doll.AnimationState.CRAWL: 
+            # go to sit at opposite direction
             animator.facing_direction *= -1
-        animator.change_animation_state(try_stand_states[animator.animation_state])
+        animator.call_change_animation_state(doll.try_stand_states[animator.animation_state])
+        # held stand: kneel <-> CROUCH <-> stand
+        if _up_held and animator.animation_state == doll.AnimationState.CROUCH:
+            animator.call_change_animation_state(doll.AnimationState.UPRIGHT)
+        # trigger cooldown
         trigger_crouch_stand_cooldown()
+    else:
+        print("Try stand failed: " + str(crouch_stand_cooldown_frames))
 
 func try_crouch(_down_held: bool): # NOTDONE - held interaction
     # crouch -> sit / kneel -> crawl
-    if is_crouch_stand_cooled() and try_crouch_states.has(animator.animation_state):
-        if animator.animation_state == animator.AnimationState.SIT:
+    if is_crouch_stand_cooled() and doll.try_crouch_states.has(animator.animation_state):
+        if animator.animation_state == doll.AnimationState.SIT:
+            # go to crawl at opposite direction
             animator.facing_direction *= -1
-        animator.change_animation_state(try_crouch_states[animator.animation_state])
+        animator.call_change_animation_state(doll.try_crouch_states[animator.animation_state])
+        # held stand: kneel <-> CROUCH <-> stand
+        if _down_held and animator.animation_state == doll.AnimationState.CROUCH:
+            animator.call_change_animation_state(doll.AnimationState.KNEEL)
+        # trigger cooldown
         trigger_crouch_stand_cooldown()
+    else:
+        print("Try crouch failed: " + str(crouch_stand_cooldown_frames))
 
 func try_release_jump(): # NOTDONE
-    # cut existing jump action short
+    # cut existing jump action short by just limiting height
     # prance, standinghops and flips
-    pass
+    var can_release_jump_types = [doll.JumpState.PRANCE, doll.JumpState.HOP, doll.JumpState.FLIP]
+    jump_released = true
+    if jump_state in can_release_jump_types:
+        proactive_movement_speed.y = proactive_movement_speed.y * 0.3
+        print("Jump released early!")
+    else:
+        print("Failed to release jump: current jump state does not allow release: " + str(jump_state))
 
 func try_jump(direction_held: bool) -> void:
     # invalid jumping conditions
@@ -226,27 +243,28 @@ func try_jump(direction_held: bool) -> void:
 
     # try jumping
     # - flips
-    if is_turning() and (animator.animation_state == animator.AnimationState.UPRIGHT): # flip
+    if is_turning() and (animator.animation_state == doll.AnimationState.UPRIGHT): # flip
         instant_flip()
         return
     # - prance
     if direction_held and ( # prance
-        animator.animation_state == animator.AnimationState.UPRIGHT): 
+        animator.animation_state == doll.AnimationState.UPRIGHT): 
         instant_prance()
         return
     # - pounce
     if direction_held and ( # pounce
-        (animator.animation_state == animator.AnimationState.CROUCH) or 
-        (animator.animation_state == animator.AnimationState.ROLL)):
+        (animator.animation_state == doll.AnimationState.CROUCH) or 
+        (animator.animation_state == doll.AnimationState.ROLL)):
         instant_pounce()
 
     instant_hop() # available to Kneel, Crouch and Upright
 
 func try_roll():
-    if (character_body.is_on_floor() and is_hard_landed and animator.facing_direction != 0) or (
-        animator.animation_state == animator.AnimationState.KNEEL):
+    if (character_body.is_on_floor() and is_hard_landed()) or (
+        animator.animation_state == doll.AnimationState.KNEEL):
         instant_roll()
     # requires touching ground + hard land
+    # directional key held is implied when calling this function
 
 func try_turn():
     # called by input controller directly, easier to detect on input end.
@@ -270,28 +288,28 @@ func instant_flip(): # NOTDONE
     flip_impulse.x *= animator.facing_direction
     proactive_movement_speed += flip_impulse
     jump_state = JumpState.FLIP
-    animator.change_animation_state(animator.AnimationState.FLIP)
+    animator.change_animation_state(doll.AnimationState.FLIP)
 func instant_hop(): # NOTDONE
     print("Hop executed!")
     var hop_impulse = hop_velocity * base_jump_strength
     hop_impulse.x *= animator.facing_direction
     proactive_movement_speed += hop_impulse
     jump_state = JumpState.HOP
-    animator.change_animation_state(animator.AnimationState.UPRIGHT)
+    animator.change_animation_state(doll.AnimationState.UPRIGHT)
 func instant_pounce(): # NOTDONE
     print("Pounce executed!")
     var pounce_impulse = pounce_velocity * base_jump_strength
     pounce_impulse.x *= animator.last_facing_direction
     proactive_movement_speed += pounce_impulse
     jump_state = JumpState.POUNCE
-    animator.change_animation_state(animator.AnimationState.CRAWL)
+    animator.change_animation_state(doll.AnimationState.CRAWL)
 func instant_prance(): # NOTDONE
     print("Prance executed!")
     var prance_impulse = prance_velocity * base_jump_strength
     prance_impulse.x *= animator.last_facing_direction
     proactive_movement_speed += prance_impulse
     jump_state = JumpState.PRANCE
-    animator.change_animation_state(animator.AnimationState.UPRIGHT)
+    animator.change_animation_state(doll.AnimationState.UPRIGHT)
 
 func instant_roll(): # NOTDONE
     print("Roll executed!")
